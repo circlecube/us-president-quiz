@@ -24,7 +24,8 @@ var PATHS = {
   ],
   sass: [
     'bower_components/foundation-sites/scss',
-    'bower_components/motion-ui/src/'
+    'bower_components/motion-ui/src/',
+    'bower_components/font-awesome/scss/'
   ],
   javascript: [
     'bower_components/jquery/dist/jquery.js',
@@ -145,6 +146,12 @@ gulp.task('javascript', function() {
     .on('finish', browser.reload);
 });
 
+// Copy fontawesome fonts 
+gulp.task('icons', function() { 
+    return gulp.src(['bower_components/font-awesome/fonts/**.*']) 
+        .pipe(gulp.dest('dist/assets/fonts')); 
+});
+
 // Copy images to the "dist" folder
 // In production, the images are compressed
 gulp.task('images', function() {
@@ -160,7 +167,7 @@ gulp.task('images', function() {
 
 // Build the "dist" folder by running all of the above tasks
 gulp.task('build', function(done) {
-  sequence('clean', ['pages', 'sass', 'javascript', 'images', 'copy'], 'styleguide', done);
+  sequence('clean', ['pages', 'sass', 'javascript', 'icons', 'images', 'copy'], 'styleguide', done);
 });
 
 // Start a server with LiveReload to preview the site in
