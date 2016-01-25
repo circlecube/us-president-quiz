@@ -6,14 +6,39 @@
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foundation for Sites</title>
+    <title>Presidents of USA</title>
     <link rel="stylesheet" href="{{root}}assets/css/app.css">
   </head>
   <body>
+    <div class="off-canvas-wrapper"><div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+    <div class="off-canvas position-left" id="offCanvas" data-off-canvas>
+      <button type="button" class="button" data-toggle="offCanvas">x</button>
+      <ul class="menu vertical nested" data-submenu>
+        <li><a href="#"><i class="fa fa-calendar"></i> <span>Quiz</span></a>
+          <ul class="submenu menu vertical">
+            <li><a href="#"><i class="fa fa-calendar"></i><span>1700s</span></a></li>
+            <li><a href="#"><i class="fa fa-calendar"></i><span>1800s</span></a></li>
+            <li><a href="#"><i class="fa fa-calendar"></i><span>1900s</span></a></li>
+          </ul></li>
+        <li><a href="#"><i class="fa fa-calendar"></i> <span>Two</span></a></li>
+        <li><a href="#"><i class="fa fa-calendar"></i> <span>Three</span></a></li>
+        <li><a href="#"><i class="fa fa-calendar"></i> <span>Four</span></a></li>
+      </ul>
+    </div>
+    <div class="off-canvas-content" data-off-canvas-content>
+  
+      <div class="title-bar">
+        <div class="title-bar-left">
+          <button class="menu-icon" type="button" data-open="offCanvas"></button>
+          <span class="title-bar-title">Presidents of the USA</span>
+        </div>
+      </div>
 
-    {{!-- Pages you create in the src/pages/ folder are inserted here when the flattened page is created. --}}
-    {{> body}}
+      {{!-- Pages you create in the src/pages/ folder are inserted here when the flattened page is created. --}}
+      {{> body}}
+    </div>
 
+    </div></div>
     <script src="{{root}}assets/js/app.js"></script>
   </body>
 </html>
