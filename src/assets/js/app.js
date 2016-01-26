@@ -1,8 +1,12 @@
 if (!window.console) console = {log: function() {}};
 
-jQuery( function( $ ) {
+jQuery(document).ready(function($) {
 	
-	var time = new Date();
+	var start_time = new Date();
+	var end_time = new Date();
+	var seconds = 0; // (start_time - end_time)/-1000;
+	var delay_time = 900;
+
 	var presidents;//array to hold all president objects with data in this format:
 	/*
 		id: 233,
@@ -49,39 +53,123 @@ jQuery( function( $ ) {
 		},
 		},
 	*/
-	$('.start').html('getting data ' + timer(time) );
+	var gaPlugin;
+	var completed = [];
+	var num_total = 0;
+	var num_correct = 0;
+	var num_incorrect = 0;
+	var score_percent = 0;
+	var level = 0;
+	var mode = 'learn';// learn/test
+	var levels = [
+	    ['face'],
+	    // ['term'],
+	    // ['party'],
+	    // ['birthday'],
+	    // ['bio'],
+	    // ['hometown'],
+	    // ['Vice President'],
+	    // ['Previous Office']
 
-	//load data from api url
-	//https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?filter[posts_per_page]=-1
+	];
+	var free_version = false;
 
-	$.ajax({
-	  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?filter[posts_per_page]=-1&filter[order]=ASC&filter[orderby]=meta_value_num&filter[meta_key]=took_office',
-	  cache: false,
-	  error: function ( jqXHR, textStatus, errorThrown ) {
-	  	$('.start').html('error getting data');
-	  },
-	  success: function ( data ) {
-	  	$('.start').html('processing data ' + timer(time));
-	    //send json respons to setup
-	    setup(data);
-	  },
-	});
+	var perfect = ['Perfect!', 'Flawless!', 'Amazing!', 'On a Roll!', 'Impeccable!', 'Unblemished!'];
+	var kudos =  ['Great!', 'Awesome!', 'Well done,', 'You\'re Smart,', 'Crazy Good!', 'Feelin\' it!', 'Dynamite!', 'Gold Star!', 'Impressive!', 'Exactly!', 'Correct!', 'Bingo!', 'On the nose!', 'Right!', 'Right on!', 'Righteous!', '', 'Inspiring!', 'Precisely!', 'Exactly!', 'Right as Rain!', ''];
+	var banter = ['Ouch!', 'Doh!', 'Fail!', 'Focus, only', 'Finger Slip?', 'Don\'t Give Up!', 'Good Grief!', 'Embarrasing!', 'Wrong!', 'Miss!', 'Incorrect!', 'You Blew It!', 'Nope!', 'You Must Be Joking!', 'Woah!', 'Need Help?', 'Try Studying,', 'Incorrect!', 'False!', 'Make sure to keep your eyes open.', 'Try Again,', 'Nice try, '];
+	var active_team = presidents;
+	var active_team_title = 'Presidents';
+	var list_player;
+	var list_player_template;
+	var rosters = [ ['All', 0] ];
+	var roster = 'All';
 
+	//setup handlebars
+	// list_player = $("#list_player").html();
+	// list_player_template = Handlebars.compile(list_player);
 
-	function setup(presidents){
+	//run init
+	init();
+
+	function init(){
+		//add event listeners
+		document.addEventListener("deviceready", onDeviceReady, false);
+		document.addEventListener("menubutton", onMenuKeyDown, false);
+		document.addEventListener("backbutton", onBackKeyDown, false);
+
+		//output loading message
+		$('.start').html('getting data ' + timer(start_time) );
+
+		// load data from api from the following url:
+		/* https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?
+			filter[posts_per_page]=-1&
+			filter[order]=ASC&
+			filter[orderby]=meta_value_num&
+			filter[meta_key]=took_office
+		*/
+		$.ajax({
+		  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?filter[posts_per_page]=-1&filter[order]=ASC&filter[orderby]=meta_value_num&filter[meta_key]=took_office',
+		  cache: false,
+		  error: function ( jqXHR, textStatus, errorThrown ) {
+		  	$('.start').html('error getting data');
+		  },
+		  success: function ( data ) {
+		  	$('.start').html('processing data ' + timer(start_time));
+		    //send json response to setup function
+		    setup(data);
+		  },
+		});
+
+		//load settings from localStorage
+	}
+
+	//once json received, process date and then start game
+	function setup(json){
+		presidents = json;
 		$('#page_content').append('<section class="presidents"><h1>US Presidents</h1></section>');
-		for (var i = 0; i < presidents.length;i++){
-			// console.log(presidents[i].title);
-			var president = '<h2>' + presidents[i].title.rendered + '</h2>';
-			var start, end;
-			start = stringtodate(presidents[i].acf.took_office);
-			end = stringtodate(presidents[i].acf.left_office);
+		// for (var i = 0; i < presidents.length;i++){
+		// 	// console.log(presidents[i].title);
+		// 	var president = '<h2>' + presidents[i].title.rendered + '</h2>';
+		// 	var start, end;
+		// 	start = stringtodate(presidents[i].acf.took_office);
+		// 	end = stringtodate(presidents[i].acf.left_office);
 				
-			president += '<h3>' + start.getFullYear() + ' - ' + end.getFullYear() + '</h3>';
-			president += '<img src="' + presidents[i].acf.portrait[0].sizes.medium + '" />';
-			$('.presidents').append('<article class="president">' + president + '</article>');
+		// 	president += '<h3>' + start.getFullYear() + ' - ' + end.getFullYear() + '</h3>';
+		// 	president += '<img src="' + presidents[i].acf.portrait[0].sizes.medium + '" />';
+		// 	$('.presidents').append('<article class="president">' + president + '</article>');
+		// }
+		$('.start').html('ready to go ' + timer(start_time));
+
+		active_team = presidents;
+
+
+		build_rosters();
+		
+		update_roster();
+
+		//calculate ages of people
+		set_ages();
+
+		//begin game
+		game_on();
+	}
+
+	function set_ages(){
+		for ( var i = 0; i < active_team.length; i++){
+			active_team[i].age = get_age(active_team[i].acf.birthdate, active_team[i].acf.death_date);
+			// console.log(active_team[i].title.rendered, active_team[i].age);
 		}
-		$('.start').html('ready to go ' + timer(time));
+	}
+
+	function get_age(start, end) {
+		end = typeof end !== 'undefined' || end !== '' ? stringtodate(end) : new Date();
+	    var start = stringtodate(start);
+	    var age = end.getFullYear() - start.getFullYear();
+	    var m = end.getMonth() - start.getMonth();
+	    if (m < 0 || (m === 0 && end.getDate() < start.getDate())) {
+	        age--;
+	    }
+	    return age;
 	}
 
 	function stringtodate(string){
@@ -100,6 +188,438 @@ jQuery( function( $ ) {
 		console.log( (now-time)/1000 + 's' );
 		return (now-time)/1000 + 's';
 	}
+
+	function onDeviceReady() {
+		//https://github.com/phonegap-build/GAPlugin/blob/c928e353feb1eb75ca3979b129b10b216a27ad59/README.md
+		//gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Button", "Click", "event only", 1);
+	    gaPlugin = window.plugins.gaPlugin;
+	    gaPlugin.init(nativePluginResultHandler, nativePluginErrorHandler, "UA-1466312-13", 10);
+
+		gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "App", "Begin");
+	}
+	
+
+	function onMenuKeyDown() {
+	    // Handle the menu button
+	    $('.menu-icon').trigger('click');
+	}
+
+	function onBackKeyDown() {
+	    // Handle the back button
+	    // do nothing
+	}
+
+
+	function build_rosters(){
+		console.log('build rosters');
+		//get rosters from data and build master
+		for ( var i = 0; i < active_team.length; i++ ){
+			active_team[i].rosters = ''; //initialize rosters value since there is none yet
+			active_team[i].rosters += ',All';
+			var player_rosters_string = active_team[i].rosters;			
+			var player_rosters = player_rosters_string.split(',');
+			for ( var j = 0; j < player_rosters.length; j++ ) {
+				//if not in rosters already
+				if ( player_rosters[j] !== '' ) {
+					var main_roster_index = -1;
+					for( var k = 0; k < rosters.length; k++){
+						//match
+						if( player_rosters[j] == rosters[k][0] ) {
+							main_roster_index = k;
+							//increment count
+							rosters[k][1]++;
+						}
+					}
+					if ( main_roster_index === -1 ) {
+						//add to master rosters list
+						// console.log('adding new roster', player_rosters[j]);
+						var new_roster = [player_rosters[j], 1];
+						rosters.push( new_roster );
+					}
+				}
+			}
+		}
+		
+		console.log(rosters);
+		
+		//sort alphabetically
+		rosters.sort(function(a, b) {
+		    return parseInt( b[0].substring(0, 4) ) - parseInt( a[0].substring(0,4) );
+		});
+		
+		console.log(rosters);
+		
+		//build menu item for each roster
+		var rosters_html = '';
+		for (var i = 0; i < rosters.length; i++){
+			//only show near full squads - at least 20 men
+			if (rosters[i][1] >= 20 ) {
+				rosters_html += '<li><a href="#" class="quiz quiz_roster" data-index="'+i+'" data-value="' + rosters[i][0] + '" data-count="' + rosters[i][1] + '">' + rosters[i][0] + '</a></li>';
+			}
+		}
+		$('.quiz_roster ul').html(rosters_html);
+	}
+
+	function update_roster() {
+		console.log('update rosters');
+		//filter out any players without a specific value
+		//these will automatically be added to the build as images are added
+		
+		console.log(levels[level][0]);
+		
+		switch(levels[level][0]) {
+		    /*case 'stats':
+				active_team = $.grep( presidents, function( player, i ) {
+				  return 	player.img != null && 
+				  			player.caps != null && 
+				  			player.pos != '' && 
+				  			player.rosters.indexOf( roster ) > -1;
+		  		});
+	  		break;	
+			
+			case 'club':
+				active_team = $.grep( presidents, function( player, i ) {
+				  return 	player.img != null && 
+				  			player.club != null && 
+				  			player.club != '' && 
+				  			player.rosters.indexOf( roster ) > -1;
+		  		});
+	  		break;
+		
+			case 'hometown':
+				active_team = $.grep( presidents, function( player, i ) {
+				  return 	player.img != null && 
+				  			player.hometown != null && 
+				  			player.hometown != '' && 
+				  			player.rosters.indexOf( roster ) > -1;
+				});
+				break;
+			*/
+			default:  //face / default
+				//filter out any without an image
+				active_team = $.grep( presidents, function( player, i ) {
+				  return 	player.acf.portrait != null && 
+				  			player.rosters.indexOf( roster ) > -1;
+				});
+			
+		}
+	}
+
+
+
+
+	function game_on(){
+		console.log('game on');
+		$('.score').html('');
+		completed = [];
+		num_total = 0;
+		num_correct = 0;
+		num_incorrect = 0;
+		score_percent = 0;
+		new_question();
+	}
+	function new_question(){
+		console.log('new_question');
+	    
+	    make_question(active_team, get_random_groupindex(active_team));
+
+	}
+	function make_question(group, answer_index){
+		console.log('make_question', group, answer_index);
+	    //get mc answers
+	    var mc_answers = get_random_mc_answers(group, answer_index);
+	    //console.log(levels[level][0]);
+	    switch(levels[level][0]) {
+	        
+	        default: //face
+	            $('.content').html('<h2 data-answer="' + group[answer_index].title.rendered + '" class="question">' + group[answer_index].title.rendered + '</h2>');
+	            for (var i = 0; i < 4; i++){
+	                $('.content').append(get_answer_div(group,mc_answers,i,2));
+	            } 
+	          //error
+	    }
+	    
+
+	    var correct = $.inArray(answer_index, mc_answers);
+	    // $('.answer_'+correct).addClass('correct');
+	    $('.answer').each(function(idx, ele){
+	    	// console.log( $(this).data('answer'), $('.question').data('answer') );
+	    	if ( $(this).data('answer') == $('.question').data('answer') ) {
+	    		$(this).addClass('correct');
+		    }
+	    });
+	}
+	function get_answer_div(group, mc_answers, index, img){
+	    var answer_div = "";
+	    switch(levels[level][0]) {
+
+	        default: //face
+	            answer_div =  '<div data-answer="' + group[mc_answers[index]].title.rendered + '"';
+	            answer_div += ' class="answer answer_' + index + '"';
+	            answer_div += ' data-id="' + mc_answers[index] + '"';
+	            answer_div += ' data-level="' + levels[level][0] + '"';
+	            answer_div += ' style="background-image: url(' + group[mc_answers[index]].acf.portrait[0].sizes.medium + ');';
+	            answer_div += ' background-position:50% center;"';
+	            answer_div += ' data-alt="' + group[mc_answers[index]].title.rendered + '">';
+	            answer_div += '</div>';
+	          //error
+	    }
+	    return answer_div;
+	}
+
+	function get_random_mc_answers(group, correct){
+	    var generated = [];
+	    generated.push(correct);
+	    for (var i = 1; i < 4; i++) {
+	        while(true){
+	            var next = Math.floor(Math.random()*group.length);
+	            if (0 > $.inArray(next, generated)) {
+	                // Done for this iteration
+	                generated.push(next);
+	                break;
+	            }
+	        }
+	    }
+	    randomize(generated);
+	    return generated;
+	}
+	function get_random_groupindex(group){
+		// console.log('get_random_groupindex');
+	    var random_index = Math.floor(Math.random()*group.length);
+		// console.log(completed);
+	    //console.log(completed.toString(), random_index, $.inArray(random_index, completed));
+	    if ( $.inArray(random_index, completed) < 0 ){
+	        //console.log('unique found');
+	        return random_index;
+	    }
+	    else if( completed.length == group.length ){
+	        completed = [];
+	        return random_index;
+	    }
+	    else{
+	        //console.log('repeat found');
+	        return get_random_groupindex(group);
+	    }
+	}
+	function get_random_index(group){
+	    var random_index = Math.floor(Math.random()*group.length);
+	    return random_index;
+	}
+	function randomize(myArray) {
+	  var i = myArray.length, j, tempi, tempj;
+	  if ( i == 0 ) return false;
+	  while ( --i ) {
+	     j = Math.floor( Math.random() * ( i + 1 ) );
+	     tempi = myArray[i];
+	     tempj = myArray[j];
+	     myArray[i] = tempj;
+	     myArray[j] = tempi;
+	   }
+	}
+
+
+	$('.content').on('click', '.answer', function(e){
+		//console.log('clicked',$(this).attr('data-id'));
+		
+		// LEARN MODE
+		if (mode == 'learn' ){
+			
+		    $(this).addClass('clicked');
+		    var is_correct = false;
+		        // end_time = new Date();
+		        // time = start_time - end_time;
+
+		    if ( $(this).hasClass('correct') ){
+		        is_correct = true;
+		        //calculate total clicked answers for this question
+		        var num_clicked = $('.clicked').length;
+
+		        if ( num_clicked == 1 ){
+		        	completed.push( parseInt($(this).attr('data-id')) );
+		            num_correct++;
+		        }
+		    }
+		    
+		    if( $(this).data('alt') != undefined ) {
+		        $(this).prepend( '<p class="label">' + $(this).data('alt') +'</p>' );
+		    }
+
+		        // end_time = new Date();
+		        // seconds = Math.floor( (start_time - end_time ) / -1000);
+		        // var correct_per_minute = Math.round( (num_correct / seconds ) * 60 );
+		    //console.log( correct_per_minute );
+		    //update score + feedback
+		    $('.score').html('');
+
+		    //if round complete
+		    //console.log(is_correct, num_correct, active_team.length, num_total);
+		    if( is_correct && num_correct == active_team.length ) {
+		        if (gaPlugin) {
+		        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt') );
+		        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Round", "End", levels[level][0] + ' ' + mode, parseInt(num_correct / (num_total+1)*100 ) );
+		        }
+		        $('.score').html(kudos[get_random_index(kudos)] + ' You Know All ' + active_team.length + '! ');
+		        $('.score').append( score_percent + '% Accuracy! ');
+		        //$('.score').append('That\'s a rate of '+ correct_per_minute + ' correct answers a minute!');
+		        completed.length = 0;
+		        num_total = -1;
+		        num_correct = 0;
+		        is_correct = false;
+		        $('.score').append('<br />Play another level?');
+		        
+		        $('.content').html('');
+		    }
+		    //perfect score
+		    else if ( is_correct && num_correct > num_total ){
+		        $('.score').append(perfect[get_random_index(perfect)]);
+		        $('.score').append(' You know ' + num_correct + ' ' + active_team_title + ' player' );
+		        if (num_correct > 1){ $('.score').append('s'); }
+		        $('.score').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
+		        //$('.score').append( seconds + ' seconds! ');
+		        if (gaPlugin) {
+					gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt') );
+				}
+		    }
+		    //correct answer
+		    else if (is_correct){
+		        $('.score').append(kudos[get_random_index(kudos)]);
+		        $('.score').append(' You know ' + num_correct + ' ' + active_team_title + ' player' );
+		        if (num_correct > 1){ $('.score').append('s'); }
+		        $('.score').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
+		        //$('.score').append( seconds + ' seconds! ');
+		        if (gaPlugin) {
+			        gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt') );
+			    }
+		    }
+		    //incorrect answer
+		    else{
+		        $('.score').append(banter[get_random_index(banter)]);
+		        $('.score').append(' You know ' + num_correct + ' ' + active_team_title + ' player' );
+		        if (num_correct > 1){ $('.score').append('s'); }
+		        $('.score').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
+		        //$('.score').append( seconds + ' seconds! ');
+		        if (gaPlugin) {
+		        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Incorrect", $(this).parent().find('.correct').data('alt') );
+				}
+		    }
+
+		    //share
+		    score_percent = parseInt(num_correct / (num_total+1)*100 );
+		    $('.score').append('<div class="share_button" data-score="' + score_percent + '">Share your score!</div>');
+
+		    num_total++;
+
+		    if( is_correct ){
+		        //num_total++;
+		        //advance to next question
+		        setTimeout(function() {
+		            new_question();
+		        }, delay_time);
+		    }
+		}
+		
+		//TEST MODE
+		else if( mode == 'test'){
+
+		    $(this).addClass('clicked');
+		    var is_correct = false;
+		        // end_time = new Date();
+		        // time = start_time - end_time;
+
+		    if ( $(this).hasClass('correct') ){
+		        is_correct = true;
+		        //calculate total clicked answers for this question
+		        var num_clicked = $('.clicked').length;
+		        if ( num_clicked == 1 ){
+		            num_correct++;
+		        }
+		    }
+		    else{
+		    	num_incorrect++;
+		    }
+		    //console.log('pushing to complete list: '+$('.correct').attr('data-id'), $('.correct').data('alt') );
+		    completed.push( parseInt($('.correct').attr('data-id')) );
+		    
+		    if( $(this).data('alt') != undefined ) {
+		        $(this).prepend( '<p class="label">' + $(this).data('alt') +'</p>' );
+		    }
+
+		        // end_time = new Date();
+		        // seconds = Math.floor( (start_time - end_time ) / -1000);
+		        // var correct_per_minute = Math.round( (num_correct / seconds ) * 60 );
+		    //console.log( correct_per_minute );
+		    //update score + feedback
+		    $('.score').html('');
+
+		    //round complete
+		    if( parseInt(active_team.length - completed.length) <= 0 ) {
+		        if (gaPlugin) {
+		        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt') );
+		        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Round", "End", levels[level][0] + ' ' + mode, parseInt(num_correct / (num_total+1)*100 ) );
+		        }
+		        $('.score').html('Test Complete. You Know ' + num_correct + ' of ' + active_team.length + ' players! ');
+		        $('.score').append( score_percent + '% Accuracy! ');
+		        //$('.score').append('That\'s a rate of '+ correct_per_minute + ' correct answers a minute!');
+		        completed.length = 0;
+		        num_total = -1;
+		        num_correct = 0;
+		        is_correct = false;
+		        $('.score').append('<br />Play another level?');
+		        
+		        $('.content').html('');
+		    }
+		    //not yet complete
+		    else{
+			    //perfect score
+			    if ( is_correct && num_correct > num_total ){
+			        $('.score').append(perfect[get_random_index(perfect)]);
+			        $('.score').append(' You know ' + num_correct + ' of ' + completed.length + ' ' + active_team_title + ' players' );
+			        // if (num_correct > 1){ $('.score').append('s'); }
+			        $('.score').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
+			        //$('.score').append( seconds + ' seconds! ');
+			        if (gaPlugin) {
+			        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt'));
+			        }
+			    }
+			    //correct answer
+			    else if (is_correct){
+			        $('.score').append(kudos[get_random_index(kudos)]);
+			        $('.score').append(' You know ' + num_correct + ' of ' + completed.length + ' ' + active_team_title + ' players' );
+			        // if (num_correct > 1){ $('.score').append('s'); }
+			        $('.score').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
+			        //$('.score').append( seconds + ' seconds! ');
+			        if (gaPlugin) {
+			        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt'));
+					}
+			    }
+			    //incorrect answer
+			    else{
+			        $('.score').append(banter[get_random_index(banter)]);
+			        $('.score').append(' You know ' + num_correct + ' of ' + completed.length + ' ' + active_team_title + ' players' );
+			        // if (num_correct > 1){ $('.score').append('s'); }
+			        $('.score').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
+			        //$('.score').append( seconds + ' seconds! ');
+			        if (gaPlugin) {
+			        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Incorrect", $(this).parent().find('.correct').data('alt') );
+					}
+			    }
+
+			    //share
+			    score_percent = parseInt(num_correct / (num_total+1)*100 );
+			    $('.score').append('<div class="share_button" data-score="' + score_percent + '">Share your score!</div>');
+
+			    num_total++;
+
+			    // if( is_correct ){
+			        //num_total++;
+			        //advance to next question
+			        setTimeout(function() {
+			            new_question();
+			        }, delay_time);
+			    // }
+			}
+		}
+	});
 
 });
 
