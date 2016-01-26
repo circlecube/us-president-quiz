@@ -12,8 +12,10 @@
   <body>
     <div class="off-canvas-wrapper"><div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
     <div class="off-canvas position-left" id="offCanvas" data-off-canvas>
-      <button type="button" class="button" data-toggle="offCanvas">x</button>
-      <ul class="menu vertical nested" data-submenu>
+      <button class="close-button" aria-label="Close menu" type="button" data-close="">
+        <span aria-hidden="true">×</span>
+      </button>
+      <ul class="menu mobile-ofc vertical nested" data-submenu>
         <li><a href="#"><i class="fa fa-calendar"></i> <span>Quiz</span></a>
           <ul class="submenu menu vertical">
             <li><a href="#"><i class="fa fa-calendar"></i><span>1700s</span></a></li>
