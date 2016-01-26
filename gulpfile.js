@@ -6,6 +6,7 @@ var panini   = require('panini');
 var rimraf   = require('rimraf');
 var sequence = require('run-sequence');
 var sherpa   = require('style-sherpa');
+var zip      = require('gulp-zip');
 
 // Check for --production flag
 var isProduction = !!(argv.production);
@@ -173,9 +174,17 @@ gulp.task('images', function() {
     .on('finish', browser.reload);
 });
 
+
+// Zip dist folder as a deliverable
+gulp.task('zip', () => {
+    return gulp.src('dist/**/*')
+        .pipe(zip('dist.zip'))
+        .pipe(gulp.dest('zip'));
+});
+
 // Build the "dist" folder by running all of the above tasks
 gulp.task('build', function(done) {
-  sequence('clean', ['pages', 'sass', 'javascript', 'icons', 'images', 'copy', 'xml'], done);
+  sequence('clean', ['pages', 'sass', 'javascript', 'icons', 'images', 'copy', 'xml'], 'zip', done);
 });
 
 // Start a server with LiveReload to preview the site in
