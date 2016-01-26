@@ -90,6 +90,7 @@ gulp.task('pages:reset', function(done) {
   done();
 });
 
+/*
 gulp.task('styleguide', function(done) {
   sherpa('src/styleguide/index.md', {
     output: 'dist/styleguide.html',
@@ -99,6 +100,7 @@ gulp.task('styleguide', function(done) {
     done();
   });
 });
+*/
 
 // Compile Sass into CSS
 // In production, the CSS is compressed
@@ -152,6 +154,12 @@ gulp.task('icons', function() { 
         .pipe(gulp.dest('dist/assets/fonts')); 
 });
 
+// Copy config xml 
+gulp.task('xml', function() { 
+    return gulp.src(['src/config.xml']) 
+        .pipe(gulp.dest('dist')); 
+});
+
 // Copy images to the "dist" folder
 // In production, the images are compressed
 gulp.task('images', function() {
@@ -167,7 +175,7 @@ gulp.task('images', function() {
 
 // Build the "dist" folder by running all of the above tasks
 gulp.task('build', function(done) {
-  sequence('clean', ['pages', 'sass', 'javascript', 'icons', 'images', 'copy'], 'styleguide', done);
+  sequence('clean', ['pages', 'sass', 'javascript', 'icons', 'images', 'copy', 'xml'], done);
 });
 
 // Start a server with LiveReload to preview the site in
@@ -185,5 +193,6 @@ gulp.task('default', ['build', 'server'], function() {
   gulp.watch(['src/assets/scss/**/{*.scss, *.sass}'], ['sass']);
   gulp.watch(['src/assets/js/**/*.js'], ['javascript']);
   gulp.watch(['src/assets/img/**/*'], ['images']);
-  gulp.watch(['src/styleguide/**'], ['styleguide']);
+  //gulp.watch(['src/styleguide/**'], ['styleguide']);
+  gulp.watch(['src/config.xml'], ['config']);
 });
