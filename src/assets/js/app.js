@@ -98,23 +98,23 @@ jQuery(document).ready(function($) {
 		document.addEventListener("backbutton", onBackKeyDown, false);
 
 		//output loading message
-		$('.start').html('getting data ' + timer(start_time) );
+		console.log('getting data ' + timer(start_time) );
 
 		// load data from api from the following url:
 		/* https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?
 			filter[posts_per_page]=-1&
-			filter[order]=ASC&
+			filter[order]=DESC&
 			filter[orderby]=meta_value_num&
 			filter[meta_key]=took_office
 		*/
 		$.ajax({
-		  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?filter[posts_per_page]=-1&filter[order]=ASC&filter[orderby]=meta_value_num&filter[meta_key]=took_office',
+		  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?filter[posts_per_page]=-1&filter[order]=DESC&filter[orderby]=meta_value_num&filter[meta_key]=took_office',
 		  cache: false,
 		  error: function ( jqXHR, textStatus, errorThrown ) {
-		  	$('.start').html('error getting data');
+		  	console.log('error getting data');
 		  },
 		  success: function ( data ) {
-		  	$('.start').html('processing data ' + timer(start_time));
+		  	console.log('processing data ' + timer(start_time));
 		    //send json response to setup function
 		    setup(data);
 		  },
@@ -126,7 +126,7 @@ jQuery(document).ready(function($) {
 	//once json received, process date and then start game
 	function setup(json){
 		presidents = json;
-		$('#page_content').append('<section class="presidents"><h1>US Presidents</h1></section>');
+		// $('#page_content').append('<section class="presidents"><h1>US Presidents</h1></section>');
 		// for (var i = 0; i < presidents.length;i++){
 		// 	// console.log(presidents[i].title);
 		// 	var president = '<h2>' + presidents[i].title.rendered + '</h2>';
@@ -138,7 +138,7 @@ jQuery(document).ready(function($) {
 		// 	president += '<img src="' + presidents[i].acf.portrait[0].sizes.medium + '" />';
 		// 	$('.presidents').append('<article class="president">' + president + '</article>');
 		// }
-		$('.start').html('ready to go ' + timer(start_time));
+		console.log('ready to go ' + timer(start_time));
 
 		active_team = presidents;
 
@@ -147,11 +147,44 @@ jQuery(document).ready(function($) {
 		
 		update_roster();
 
+		//calculate ordinals
+		set_ordinals();
+
 		//calculate ages of people
 		set_ages();
 
 		//begin game
 		game_on();
+	}
+
+	function set_ordinals(){
+		// console.log('initial order',active_team);
+		//sort by took_office and number them
+		active_team.sort(function(a, b) {
+		    return parseInt( a.acf.took_office ) - parseInt( b.acf.took_office );
+		});
+
+		// console.log('sorted',active_team);
+
+		//add ordinal 
+		for ( var i = 0; i < active_team.length; i++){
+			active_team[i].acf.ordinal = ordinal_suffix(i+1);
+		}
+	}
+
+	function ordinal_suffix(i) {
+	    var j = i % 10,
+	        k = i % 100;
+	    if (j == 1 && k != 11) {
+	        return i + "st";
+	    }
+	    if (j == 2 && k != 12) {
+	        return i + "nd";
+	    }
+	    if (j == 3 && k != 13) {
+	        return i + "rd";
+	    }
+	    return i + "th";
 	}
 
 	function set_ages(){
@@ -328,16 +361,23 @@ jQuery(document).ready(function($) {
 		console.log('make_question', group, answer_index);
 	    //get mc answers
 	    var mc_answers = get_random_mc_answers(group, answer_index);
+	    var question_html = '';
+	    var answers_html = '';
 	    //console.log(levels[level][0]);
 	    switch(levels[level][0]) {
 	        
 	        default: //face
-	            $('.content').html('<h2 data-answer="' + group[answer_index].title.rendered + '" class="question">' + group[answer_index].title.rendered + '</h2>');
+	            question_html = '<h2 data-answer="' + group[answer_index].title.rendered + '" class="question">';
+	            question_html += group[answer_index].title.rendered;
+	            question_html += ' (' + group[answer_index].acf.ordinal + ')';
+	            question_html += '</h2>';
 	            for (var i = 0; i < 4; i++){
-	                $('.content').append(get_answer_div(group,mc_answers,i,2));
-	            } 
+	            	answers_html += get_answer_div(group,mc_answers,i,2);
+	            }
 	          //error
 	    }
+	    $('header').html(question_html);
+	    $('.content').html(answers_html);
 	    
 
 	    var correct = $.inArray(answer_index, mc_answers);
@@ -440,9 +480,9 @@ jQuery(document).ready(function($) {
 		        }
 		    }
 		    
-		    if( $(this).data('alt') != undefined ) {
-		        $(this).prepend( '<p class="label">' + $(this).data('alt') +'</p>' );
-		    }
+		    // if( $(this).data('alt') != undefined ) {
+		    //     $(this).prepend( '<p class="label">' + $(this).data('alt') +'</p>' );
+		    // }
 
 		        // end_time = new Date();
 		        // seconds = Math.floor( (start_time - end_time ) / -1000);
@@ -540,9 +580,9 @@ jQuery(document).ready(function($) {
 		    //console.log('pushing to complete list: '+$('.correct').attr('data-id'), $('.correct').data('alt') );
 		    completed.push( parseInt($('.correct').attr('data-id')) );
 		    
-		    if( $(this).data('alt') != undefined ) {
-		        $(this).prepend( '<p class="label">' + $(this).data('alt') +'</p>' );
-		    }
+		    // if( $(this).data('alt') != undefined ) {
+		    //     $(this).prepend( '<p class="label">' + $(this).data('alt') +'</p>' );
+		    // }
 
 		        // end_time = new Date();
 		        // seconds = Math.floor( (start_time - end_time ) / -1000);
