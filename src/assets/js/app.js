@@ -100,27 +100,51 @@ jQuery(document).ready(function($) {
 		//output loading message
 		console.log('getting data ' + timer(start_time) );
 
-		// load data from api from the following url:
-		/* https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?
-			filter[posts_per_page]=-1&
-			filter[order]=DESC&
-			filter[orderby]=meta_value_num&
-			filter[meta_key]=took_office
-		*/
-		$.ajax({
-		  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?filter[posts_per_page]=-1&filter[order]=DESC&filter[orderby]=meta_value_num&filter[meta_key]=took_office',
-		  cache: false,
-		  error: function ( jqXHR, textStatus, errorThrown ) {
-		  	console.log('error getting data');
-		  },
-		  success: function ( data ) {
-		  	console.log('processing data ' + timer(start_time));
-		    //send json response to setup function
-		    setup(data);
-		  },
-		});
-
 		//load settings from localStorage
+
+		var reload_data_from_json = false;
+		// load data if it's not stored locally
+		// or if it's older than the expiration
+		// console.log( localStorage.json_data, localStorage.expiration_time, start_time );
+		if ( !localStorage.json_data || 
+			 start_time > localStorage.getItem( 'expiration_time' ) ||
+			 reload_data_from_json ) {
+
+			console.log( 'loading new json data');
+
+			// load data from api from the following url:
+			/* https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?
+				filter[posts_per_page]=-1&
+				filter[order]=DESC&
+				filter[orderby]=meta_value_num&
+				filter[meta_key]=took_office
+			*/
+			$.ajax({
+			  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?filter[posts_per_page]=-1&filter[order]=DESC&filter[orderby]=meta_value_num&filter[meta_key]=took_office',
+			  cache: false,
+			  error: function ( jqXHR, textStatus, errorThrown ) {
+			  	console.log('error getting data');
+			  },
+			  success: function ( data ) {
+
+			  	//set expiration time
+			  	var expiration_length = 5; //5 days
+			  	var expiration_time = new Date();
+			  	expiration_time.setDate( start_time.getDate() + expiration_length );
+
+			  	localStorage.setItem( 'json_data', JSON.stringify(data) );
+			  	localStorage.setItem( 'expiration_time', expiration_time );
+			  	
+			  	console.log('processing data ' + timer(start_time));
+			    //send json response to setup function
+			    setup(data);
+			  },
+			});
+
+		} else {
+			console.log( 'loading existing json data');
+			setup( JSON.parse( localStorage.getItem( 'json_data' ) ) );
+		}
 	}
 
 	//once json received, process date and then start game
