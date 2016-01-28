@@ -497,7 +497,7 @@ jQuery(document).ready(function($) {
 			        
 			        $('.content').html('');
 			    }
-				
+
 			    //perfect score
 			    else if ( is_correct && num_correct > num_total ){
 			        $('.footer').append(perfect[get_random_index(perfect)]);
@@ -675,6 +675,11 @@ jQuery(document).ready(function($) {
 		$('.close-button').trigger('click');
 	});
 
+	$('.footer').on('click touch', '.begin', function(e){
+		e.preventDefault();
+		game_on();
+	});
+
 	function view_all(){
 
 		$('.header').html( "<h1>US Presidents</h1>" );
@@ -689,12 +694,22 @@ jQuery(document).ready(function($) {
 			var president_html = '<article class="answer list" data-alt="';
 			president_html += presidents[i].title.rendered + ' (' + presidents[i].acf.ordinal + '), ';
 			president_html += start.getFullYear() + ' - ' + end.getFullYear();
-			president_html += '" style="background-img: url(' + presidents[i].acf.portrait[0].sizes.medium + ');"';
+			president_html += '" style="background-image: url(' + presidents[i].acf.portrait[0].sizes.medium + ');"';
 			president_html += ' data-alt="' + presidents[i].title.rendered + '">';
 			president_html += '</article>';
 
 			$('.content').append( president_html );
+
+			$('.footer').html( '<div class="button begin"><i class="fa fa-play"></i> Begin</div>' );
 		}
+	}
+
+	function show_about(){
+
+		$('.header').html( "What is this?" );
+		$('.content').html( "<p>Select play to begin the quiz. You will be shown the name of a president and portraits of 4 presidents. You must select the portrait that matches the name. The quiz is randomized so it is different every time. The quiz will also continue until you have correctly matched each president, meaning if you don't answer correctly that name will be asked again.</p>" );
+		$('.footer').html( '<div class="button begin"><i class="fa fa-play"></i> Begin</div>' );
+
 	}
 
 });

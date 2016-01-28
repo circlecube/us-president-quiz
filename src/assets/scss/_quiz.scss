@@ -27,6 +27,10 @@
 
 .content {
     max-width: 600px;
+
+    p {
+        padding: 1rem;
+    }
 }
 .answer {
     width: 50%;
@@ -44,7 +48,7 @@
         content: attr(data-alt);
         display: block;
         font-family:'Georgia',serif;
-        text-transform: uppercase;
+        // text-transform: uppercase;
         position: absolute;
         bottom: 150%;
         left: 0;
@@ -53,7 +57,7 @@
         color: #fff;
         font-size: 1.25rem;
         padding: 8px 0;
-        text-align:center;
+        text-align: center;
         border-bottom: 12px solid #d31346;
         margin: 0;
         z-index: 10;
@@ -100,13 +104,17 @@
 .answer.list.clicked:after {
 	content: none;
 }
-.score{
-    font-family:'Georgia',serif;
-    font-size: 18px;
-    text-align:left;
+.footer,
+.header {
+    font-family: 'Georgia', serif;
+    font-size: 1.1rem;
+    text-align: left;
     text-transform: none;
     padding: 1em;
-    color: #4380b7;
-    clear:both;
+    // color: #4380b7;
+    clear: both;
 }
-
+.button {
+    font-family: sans-serif;
+    text-transform: uppercase;
+}
