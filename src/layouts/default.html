@@ -2,45 +2,89 @@
 
 <!doctype html>
 <html class="no-js" lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presidents of USA</title>
-    <link rel="stylesheet" href="{{root}}assets/css/app.css">
-  </head>
-  <body>
-    <div class="off-canvas-wrapper"><div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
-    <div class="off-canvas position-left" id="offCanvas" data-off-canvas>
-      <button class="close-button" aria-label="Close menu" type="button" data-close="">
-        <span aria-hidden="true">×</span>
-      </button>
-      <ul class="menu mobile-ofc vertical nested" data-submenu>
-        <li><a href="#"><i class="fa fa-calendar"></i> <span>Quiz</span></a></li>
-        <li><a href="#"><i class="fa fa-calendar"></i> <span>Two</span></a>
-          <ul class="submenu menu vertical">
-            <li><a href="#"><i class="fa fa-calendar"></i><span>1700s</span></a></li>
-            <li><a href="#"><i class="fa fa-calendar"></i><span>1800s</span></a></li>
-            <li><a href="#"><i class="fa fa-calendar"></i><span>1900s</span></a></li>
-          </ul></li>
-        <li><a href="#"><i class="fa fa-calendar"></i> <span>Three</span></a></li>
-        <li><a href="#"><i class="fa fa-calendar"></i> <span>Four</span></a></li>
-      </ul>
-    </div>
-    <div class="off-canvas-content" data-off-canvas-content>
-  
-      <div class="title-bar">
-        <div class="title-bar-left">
-          <button class="menu-icon" type="button" data-open="offCanvas"></button>
-          <span class="title-bar-title">Presidents of the USA</span>
-        </div>
-      </div>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Presidents of USA</title>
+		<link rel="stylesheet" href="{{root}}assets/css/app.css">
+	</head>
+	<body>
+		<div class="off-canvas-wrapper">
+			<div class="off-canvas-wrapper-inner" data-off-canvas-wrapper>
+				
+				<div class="off-canvas position-left" id="offCanvas" data-off-canvas>
+					<button class="close-button" aria-label="Close menu" type="button" data-close="">
+						<span aria-hidden="true">×</span>
+					</button>
+					<ul class="menu mobile-ofc vertical nested" data-submenu>
+						<li>
+							<a href="#" class="quiz">
+								<i class="fa fa-play"></i>
+								<span>Quiz</span>
+							</a>
+							
+							<!-- <ul class="submenu menu vertical">
+								<li>
+									<i class="fa fa-users"></i>
+									<span class="title">Groups</span>
+								</li>
+								<li>
+									<a href="#" class="quiz_group" data-group="1700">
+										<i class="fa fa-calendar"></i>
+										<span>1700s</span>
+									</a>
+								</li>
+								<li>
+									<a href="#" class="quiz_group" data-group="1800">
+										<i class="fa fa-calendar"></i>
+										<span>1800s</span>
+									</a>
+								</li>
+								<li>
+									<a href="#" class="quiz_group" data-group="1900">
+										<i class="fa fa-calendar"></i>
+										<span>1900s</span>
+									</a>
+								</li>
+								<li>
+									<a href="#" class="quiz_group" data-group="2000">
+										<i class="fa fa-calendar"></i>
+										<span>2000s</span>
+									</a>
+								</li>
+							</ul> -->
+						</li>
+						<li>
+							<a href="#" class="view_all">
+								<i class="fa fa-list-ol"></i>
+								<span>View All</span>
+							</a>
+						</li>
+						<li>
+							<a href="#" class="about">
+								<i class="fa fa-question-circle"></i>
+								<span>About</span>
+							</a>
+						</li>
+					</ul>
+				</div>
+				
+				<div class="off-canvas-content" data-off-canvas-content>
+	
+					<div class="title-bar">
+						<div class="title-bar-left">
+							<button class="menu-icon" type="button" data-open="offCanvas"></button>
+							<span class="title-bar-title">Presidents of the USA</span>
+						</div>
+					</div>
 
-      {{!-- Pages you create in the src/pages/ folder are inserted here when the flattened page is created. --}}
-      {{> body}}
-    </div>
+					{{!-- Pages you create in the src/pages/ folder are inserted here when the flattened page is created. --}}
+					{{> body}}
+				</div>
 
-    </div></div>
-    <script src="{{root}}assets/js/app.js"></script>
-  </body>
+			</div>
+		</div>
+		<script src="{{root}}assets/js/app.js"></script>
+	</body>
 </html>
