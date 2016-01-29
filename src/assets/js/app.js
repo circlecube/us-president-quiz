@@ -73,7 +73,6 @@ jQuery(document).ready(function($) {
 
 	];
 	var free_version = false;
-
 	var perfect = ['Perfect!', 'Flawless!', 'Amazing!', 'On a Roll!', 'Impeccable!', 'Unblemished!'];
 	var kudos =  ['Great!', 'Awesome!', 'Well done,', 'You\'re Smart,', 'Crazy Good!', 'Feelin\' it!', 'Dynamite!', 'Gold Star!', 'Impressive!', 'Exactly!', 'Correct!', 'Bingo!', 'On the nose!', 'Right!', 'Right on!', 'Righteous!', '', 'Inspiring!', 'Precisely!', 'Exactly!', 'Right as Rain!', ''];
 	var banter = ['Ouch!', 'Doh!', 'Fail!', 'Focus, only', 'Finger Slip?', 'Don\'t Give Up!', 'Good Grief!', 'Embarrasing!', 'Wrong!', 'Miss!', 'Incorrect!', 'You Blew It!', 'Nope!', 'You Must Be Joking!', 'Woah!', 'Need Help?', 'Try Studying,', 'Incorrect!', 'False!', 'Make sure to keep your eyes open.', 'Try Again,', 'Nice try, '];
@@ -101,12 +100,20 @@ jQuery(document).ready(function($) {
 		console.log('getting data ' + timer(start_time) );
 
 		//load settings from localStorage
+		console.log( localStorage.getItem( 'times_loaded' ) );
+		if ( !localStorage.getItem( 'times_loaded' ) ) {
+			localStorage.setItem( 'times_loaded', 1 );
+		} else {
+			localStorage.setItem( 'times_loaded', parseInt(localStorage.getItem( 'times_loaded' ))+1 );
+		}
+		localStorage.setItem( 'times_loaded', 1 );
+
 
 		var reload_data_from_json = false;
 		// load data if it's not stored locally
 		// or if it's older than the expiration
 		// console.log( localStorage.json_data, localStorage.expiration_time, start_time );
-		if ( !localStorage.json_data || 
+		if ( !localStorage.getItem( 'json_data' ) || 
 			 start_time > localStorage.getItem( 'expiration_time' ) ||
 			 reload_data_from_json ) {
 
@@ -159,14 +166,20 @@ jQuery(document).ready(function($) {
 		
 		update_roster();
 
-		//calculate ordinals
+		// calculate ordinals
 		set_ordinals();
 
-		//calculate ages of people
+		// calculate ages of people
 		set_ages();
 
-		//begin game
-		game_on();
+		// first run show about
+		// else begin game
+		if ( localStorage.getItem( 'times_loaded' ) == 1 ) {
+			show_about();
+		} else {
+			
+			game_on();
+		}
 	}
 
 	function set_ordinals(){
@@ -557,8 +570,8 @@ jQuery(document).ready(function($) {
 			    }
 
 			    //share
-			    score_percent = parseInt(num_correct / (num_total+1)*100 );
-			    $('.footer').append('<div class="share_button" data-score="' + score_percent + '">Share your score!</div>');
+			    score_percent = parseInt( num_correct / ( num_total + 1 ) * 100 );
+			    // $('.footer').append('<div class="button share_button" data-score="' + score_percent + '">Share your score!</div>');
 
 			    num_total++;
 
@@ -659,7 +672,7 @@ jQuery(document).ready(function($) {
 
 				    //share
 				    score_percent = parseInt(num_correct / (num_total+1)*100 );
-				    $('.footer').append('<div class="share_button" data-score="' + score_percent + '">Share your score!</div>');
+				    $('.footer').append('<div class="button share_button" data-score="' + score_percent + '">Share your score!</div>');
 
 				    num_total++;
 
@@ -730,7 +743,7 @@ jQuery(document).ready(function($) {
 
 	function show_about(){
 
-		$('.header').html( "What is this?" );
+		$('.header').html( "<h2>How to play</h2>" );
 		$('.content').html( "<p>Select play to begin the quiz. You will be shown the name of a president and portraits of 4 presidents. You must select the portrait that matches the name. The quiz is randomized so it is different every time. The quiz will also continue until you have correctly matched each president, meaning if you don't answer correctly that name will be asked again.</p>" );
 		$('.footer').html( '<div class="button begin"><i class="fa fa-play"></i> Begin</div>' );
 

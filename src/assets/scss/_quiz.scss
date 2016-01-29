@@ -120,21 +120,21 @@ body,
     &:before {
         content: attr(data-alt);
         display: block;
-        font-family:'Merriweather',serif;
+        font-family: 'Merriweather',serif;
         font-weight: 700;
-        // text-transform: uppercase;
         position: absolute;
         bottom: 150%;
         left: 0;
         width: 100%;
-        background: #00549d;
-        color: #fff;
-        font-size: 1.25rem;
-        padding: 8px 0;
+        background: $color-primary-darker;
+        color: $color-white;
+        font-size: 1.1rem;
+        padding: .5rem;
         text-align: center;
-        border-bottom: 12px solid #d31346;
+        border-bottom: 12px solid $red;
         margin: 0;
         z-index: 10;
+        opacity: .75;
         transition: all 0.5s ease;
     }
 
