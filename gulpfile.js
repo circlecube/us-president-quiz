@@ -21,7 +21,7 @@ var COMPATIBILITY = ['last 2 versions', 'ie >= 9'];
 var PATHS = {
   assets: [
     'src/assets/**/*',
-    '!src/assets/{img,js,scss}/**/*'
+    '!src/assets/{img,js,scss,fonts}/**/*'
   ],
   sass: [
     'bower_components/foundation-sites/scss',
@@ -151,7 +151,7 @@ gulp.task('javascript', function() {
 
 // Copy fontawesome fonts 
 gulp.task('icons', function() { 
-    return gulp.src(['bower_components/font-awesome/fonts/**.*']) 
+    return gulp.src(['src/assets/fonts/**.*','bower_components/font-awesome/fonts/**.*']) 
         .pipe(gulp.dest('dist/assets/fonts')); 
 });
 
