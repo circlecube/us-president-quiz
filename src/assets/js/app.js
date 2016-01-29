@@ -78,7 +78,7 @@ jQuery(document).ready(function($) {
 	var kudos =  ['Great!', 'Awesome!', 'Well done,', 'You\'re Smart,', 'Crazy Good!', 'Feelin\' it!', 'Dynamite!', 'Gold Star!', 'Impressive!', 'Exactly!', 'Correct!', 'Bingo!', 'On the nose!', 'Right!', 'Right on!', 'Righteous!', '', 'Inspiring!', 'Precisely!', 'Exactly!', 'Right as Rain!', ''];
 	var banter = ['Ouch!', 'Doh!', 'Fail!', 'Focus, only', 'Finger Slip?', 'Don\'t Give Up!', 'Good Grief!', 'Embarrasing!', 'Wrong!', 'Miss!', 'Incorrect!', 'You Blew It!', 'Nope!', 'You Must Be Joking!', 'Woah!', 'Need Help?', 'Try Studying,', 'Incorrect!', 'False!', 'Make sure to keep your eyes open.', 'Try Again,', 'Nice try, '];
 	var active_team = presidents;
-	var active_team_title = 'Presidents';
+	var active_team_title = 'president';
 	var list_player;
 	var list_player_template;
 	var rosters = [ ['All', 0] ];
@@ -525,7 +525,7 @@ jQuery(document).ready(function($) {
 			    //perfect score
 			    else if ( is_correct && num_correct > num_total ){
 			        $('.footer').append(perfect[get_random_index(perfect)]);
-			        $('.footer').append(' You know ' + num_correct + ' ' + active_team_title + ' player' );
+			        $('.footer').append(' You know ' + num_correct + ' ' + active_team_title );
 			        if (num_correct > 1){ $('.footer').append('s'); }
 			        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 			        //$('.footer').append( seconds + ' seconds! ');
@@ -536,7 +536,7 @@ jQuery(document).ready(function($) {
 			    //correct answer
 			    else if (is_correct){
 			        $('.footer').append(kudos[get_random_index(kudos)]);
-			        $('.footer').append(' You know ' + num_correct + ' ' + active_team_title + ' player' );
+			        $('.footer').append(' You know ' + num_correct + ' ' + active_team_title );
 			        if (num_correct > 1){ $('.footer').append('s'); }
 			        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 			        //$('.footer').append( seconds + ' seconds! ');
@@ -547,7 +547,7 @@ jQuery(document).ready(function($) {
 			    //incorrect answer
 			    else{
 			        $('.footer').append(banter[get_random_index(banter)]);
-			        $('.footer').append(' You know ' + num_correct + ' ' + active_team_title + ' player' );
+			        $('.footer').append(' You know ' + num_correct + ' ' + active_team_title );
 			        if (num_correct > 1){ $('.footer').append('s'); }
 			        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 			        //$('.footer').append( seconds + ' seconds! ');
