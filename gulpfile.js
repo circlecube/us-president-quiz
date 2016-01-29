@@ -24,6 +24,7 @@ var PATHS = {
     '!src/assets/{img,js,scss,fonts}/**/*'
   ],
   sass: [
+    'src/assets/scss',
     'bower_components/foundation-sites/scss',
     'bower_components/motion-ui/src/',
     'bower_components/font-awesome/scss/'

@@ -97,10 +97,10 @@ jQuery(document).ready(function($) {
 		document.addEventListener("backbutton", onBackKeyDown, false);
 
 		//output loading message
-		console.log('getting data ' + timer(start_time) );
+		// console.log('getting data ' + timer(start_time) );
 
 		//load settings from localStorage
-		console.log( localStorage.getItem( 'times_loaded' ) );
+		// console.log( localStorage.getItem( 'times_loaded' ) );
 		if ( !localStorage.getItem( 'times_loaded' ) ) {
 			localStorage.setItem( 'times_loaded', 1 );
 		} else {
@@ -156,7 +156,7 @@ jQuery(document).ready(function($) {
 
 	//once json received, process date and then start game
 	function setup(json){
-		console.log('ready to go ' + timer(start_time));
+		// console.log('ready to go ' + timer(start_time));
 
 		presidents = json;
 
@@ -243,7 +243,7 @@ jQuery(document).ready(function($) {
 
 	function timer(time){
 		var now = new Date();
-		console.log( (now-time)/1000 + 's' );
+		// console.log( (now-time)/1000 + 's' );
 		return (now-time)/1000 + 's';
 	}
 
@@ -269,7 +269,7 @@ jQuery(document).ready(function($) {
 
 
 	function build_rosters(){
-		console.log('build rosters');
+		// console.log('build rosters');
 		//get rosters from data and build master
 		for ( var i = 0; i < active_team.length; i++ ){
 			active_team[i].rosters = ''; //initialize rosters value since there is none yet
@@ -319,11 +319,11 @@ jQuery(document).ready(function($) {
 	}
 
 	function update_roster() {
-		console.log('update rosters');
+		// console.log('update rosters');
 		//filter out any players without a specific value
 		//these will automatically be added to the build as images are added
 		
-		console.log(levels[level][0]);
+		// console.log(levels[level][0]);
 		
 		switch(levels[level][0]) {
 		    /*case 'stats':
@@ -367,7 +367,7 @@ jQuery(document).ready(function($) {
 
 
 	function game_on(){
-		console.log('game on');
+		// console.log('game on');
 		$('.footer').html('');
 		completed = [];
 		num_total = 0;
@@ -377,13 +377,13 @@ jQuery(document).ready(function($) {
 		new_question();
 	}
 	function new_question(){
-		console.log('new_question');
+		// console.log('new_question');
 	    
 	    make_question(active_team, get_random_groupindex(active_team));
 
 	}
 	function make_question(group, answer_index){
-		console.log('make_question', group, answer_index);
+		// console.log('make_question', group, answer_index);
 	    //get mc answers
 	    var mc_answers = get_random_mc_answers(group, answer_index);
 	    var question_html = '';
