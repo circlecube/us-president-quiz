@@ -2,10 +2,10 @@
     <widget xmlns = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.circlecube.uspresidentialquiz"
-        versionCode="100" 
-        version   = "1.0.0">
+        versionCode="140" 
+        version   = "1.4.0">
 
-    <name>Who's Who - US Presidents Edition</name>
+    <name>US Presidental Quiz</name>
 
     <description>
         Do you know who's who among the Presidents of the United States of America? Take this quiz to find out if you know all the current and historic leaders!
