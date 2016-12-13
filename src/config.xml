@@ -2,8 +2,8 @@
     <widget xmlns = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.circlecube.uspresidentialquiz"
-        versionCode="140" 
-        version   = "1.4.0">
+        versionCode="150" 
+        version   = "1.5.0">
 
     <name>US Presidental Quiz</name>
 
@@ -63,11 +63,13 @@
     </author>
     <gap:platform name="android" />
     <gap:platform name="ios" />
-    <preference name="android-minSdkVersion" value="11" />
-    <preference name="android-targetSdkVersion" value="14" />
-    <gap:plugin name="nl.x-services.plugins.socialsharing" />
-    <gap:plugin name="com.adobe.plugins.gaplugin" />
-    <preference name="phonegap-version" value="3.7.0" />
+
+    <access origin="*" />
+
+    <gap:plugin name="cordova-plugin-whitelist" source="npm" />
+    <gap:plugin name="cordova-plugin-x-socialsharing" source="npm" />
+    <gap:plugin name="com.cmackay.plugins.googleanalytics" source="npm" />
+
     <preference name="orientation" value="portrait"/>
     <preference name="fullscreen" value="true" />
     <preference name="permissions" value="none"/>

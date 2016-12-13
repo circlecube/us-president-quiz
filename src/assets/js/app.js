@@ -53,7 +53,7 @@ jQuery(document).ready(function($) {
 		},
 		},
 	*/
-	var gaPlugin;
+	var analytics;
 	var completed = [];
 	var num_total = 0;
 	var num_correct = 0;
@@ -91,16 +91,19 @@ jQuery(document).ready(function($) {
 	init();
 
 	function init(){
+		//clear local storage
+		//localStorage.setItem( 'expiration_time', 0);
+
 		//add event listeners
 		document.addEventListener("deviceready", onDeviceReady, false);
 		document.addEventListener("menubutton", onMenuKeyDown, false);
 		document.addEventListener("backbutton", onBackKeyDown, false);
 
 		//output loading message
-		// console.log('getting data ' + timer(start_time) );
+		// consolelog('getting data ' + timer(start_time) );
 
 		//load settings from localStorage
-		// console.log( localStorage.getItem( 'times_loaded' ) );
+		// consolelog( localStorage.getItem( 'times_loaded' ) );
 		if ( !localStorage.getItem( 'times_loaded' ) ) {
 			localStorage.setItem( 'times_loaded', 1 );
 		} else {
@@ -112,51 +115,50 @@ jQuery(document).ready(function($) {
 		var reload_data_from_json = false;
 		// load data if it's not stored locally
 		// or if it's older than the expiration
-		// console.log( localStorage.json_data, localStorage.expiration_time, start_time );
+		// consolelog( localStorage.json_data, localStorage.expiration_time, start_time );
 		if ( !localStorage.getItem( 'json_data' ) || 
 			 start_time > localStorage.getItem( 'expiration_time' ) ||
 			 reload_data_from_json ) {
 
-			console.log( 'loading new json data');
+			consolelog( 'loading new json data');
 
-			// load data from api from the following url:
-			/* https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?
-				filter[posts_per_page]=-1&
-				filter[order]=DESC&
-				filter[orderby]=meta_value_num&
-				filter[meta_key]=took_office
-			*/
 			$.ajax({
-			  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?filter[posts_per_page]=-1&filter[order]=DESC&filter[orderby]=meta_value_num&filter[meta_key]=took_office',
+			  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?per_page=50&order=asc&orderby=meta_value_num&meta_key=took_office',
 			  cache: false,
+			  dataType: 'json',
 			  error: function ( jqXHR, textStatus, errorThrown ) {
-			  	console.log('error getting data');
+			  	for (key in jqXHR) {
+			  		//consolelog(key + ":" + jqxhr[key]);
+			  	}
+				//consolelog(textStatus);
+				consolelog(errorThrown);
 			  },
 			  success: function ( data ) {
 
 			  	//set expiration time
-			  	var expiration_length = 5; //5 days
+			  	var expiration_length = 30; //5 days
 			  	var expiration_time = new Date();
 			  	expiration_time.setDate( start_time.getDate() + expiration_length );
+
 
 			  	localStorage.setItem( 'json_data', JSON.stringify(data) );
 			  	localStorage.setItem( 'expiration_time', expiration_time );
 			  	
-			  	console.log('processing data ' + timer(start_time));
+			  	consolelog('processing data ' + timer(start_time));
 			    //send json response to setup function
 			    setup(data);
 			  },
 			});
 
 		} else {
-			console.log( 'loading existing json data');
+			consolelog( 'loading existing json data');
 			setup( JSON.parse( localStorage.getItem( 'json_data' ) ) );
 		}
 	}
 
 	//once json received, process date and then start game
 	function setup(json){
-		// console.log('ready to go ' + timer(start_time));
+		// consolelog('ready to go ' + timer(start_time));
 
 		presidents = json;
 
@@ -183,13 +185,13 @@ jQuery(document).ready(function($) {
 	}
 
 	function set_ordinals(){
-		// console.log('initial order',active_team);
+		// consolelog('initial order',active_team);
 		//sort by took_office and number them
 		active_team.sort(function(a, b) {
 		    return parseInt( a.acf.took_office ) - parseInt( b.acf.took_office );
 		});
 
-		// console.log('sorted',active_team);
+		// consolelog('sorted',active_team);
 
 		//add ordinal 
 		for ( var i = 0; i < active_team.length; i++){
@@ -215,7 +217,7 @@ jQuery(document).ready(function($) {
 	function set_ages(){
 		for ( var i = 0; i < active_team.length; i++){
 			active_team[i].age = get_age(active_team[i].acf.birthdate, active_team[i].acf.death_date);
-			// console.log(active_team[i].title.rendered, active_team[i].age);
+			// consolelog(active_team[i].title.rendered, active_team[i].age);
 		}
 	}
 
@@ -243,17 +245,15 @@ jQuery(document).ready(function($) {
 
 	function timer(time){
 		var now = new Date();
-		// console.log( (now-time)/1000 + 's' );
+		// consolelog( (now-time)/1000 + 's' );
 		return (now-time)/1000 + 's';
 	}
 
 	function onDeviceReady() {
-		//https://github.com/phonegap-build/GAPlugin/blob/c928e353feb1eb75ca3979b129b10b216a27ad59/README.md
-		//gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Button", "Click", "event only", 1);
-	    gaPlugin = window.plugins.gaPlugin;
-	    gaPlugin.init(nativePluginResultHandler, nativePluginErrorHandler, "UA-1466312-16", 10);
-
-		gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "App", "Begin");
+		// https://www.npmjs.com/package/com.cmackay.plugins.googleanalytics
+	    analytics = navigator.analytics;
+	    analytics.setTrackingId("UA-1466312-16");
+		analytics.sendEvent("App", "Begin");
 	}
 	
 
@@ -269,7 +269,7 @@ jQuery(document).ready(function($) {
 
 
 	function build_rosters(){
-		// console.log('build rosters');
+		// consolelog('build rosters');
 		//get rosters from data and build master
 		for ( var i = 0; i < active_team.length; i++ ){
 			active_team[i].rosters = ''; //initialize rosters value since there is none yet
@@ -290,7 +290,7 @@ jQuery(document).ready(function($) {
 					}
 					if ( main_roster_index === -1 ) {
 						//add to master rosters list
-						// console.log('adding new roster', player_rosters[j]);
+						// consolelog('adding new roster', player_rosters[j]);
 						var new_roster = [player_rosters[j], 1];
 						rosters.push( new_roster );
 					}
@@ -298,14 +298,14 @@ jQuery(document).ready(function($) {
 			}
 		}
 		
-		// console.log(rosters);
+		// consolelog(rosters);
 		
 		//sort alphabetically
 		rosters.sort(function(a, b) {
 		    return parseInt( b[0].substring(0, 4) ) - parseInt( a[0].substring(0,4) );
 		});
 		
-		// console.log(rosters);
+		// consolelog(rosters);
 		
 		//build menu item for each roster
 		var rosters_html = '';
@@ -319,11 +319,11 @@ jQuery(document).ready(function($) {
 	}
 
 	function update_roster() {
-		// console.log('update rosters');
+		// consolelog('update rosters');
 		//filter out any players without a specific value
 		//these will automatically be added to the build as images are added
 		
-		// console.log(levels[level][0]);
+		// consolelog(levels[level][0]);
 		
 		switch(levels[level][0]) {
 		    /*case 'stats':
@@ -363,11 +363,15 @@ jQuery(document).ready(function($) {
 		}
 	}
 
+	function consolelog(msg){
+		//alert(msg);
+		console.log(msg);
+	}
 
 
 
 	function game_on(){
-		// console.log('game on');
+		// consolelog('game on');
 		$('.footer').html('');
 		completed = [];
 		num_total = 0;
@@ -377,18 +381,18 @@ jQuery(document).ready(function($) {
 		new_question();
 	}
 	function new_question(){
-		// console.log('new_question');
+		// consolelog('new_question');
 	    
 	    make_question(active_team, get_random_groupindex(active_team));
 
 	}
 	function make_question(group, answer_index){
-		// console.log('make_question', group, answer_index);
+		// consolelog('make_question', group, answer_index);
 	    //get mc answers
 	    var mc_answers = get_random_mc_answers(group, answer_index);
 	    var question_html = '';
 	    var answers_html = '';
-	    //console.log(levels[level][0]);
+	    //consolelog(levels[level][0]);
 	    switch(levels[level][0]) {
 	        
 	        default: //face
@@ -408,7 +412,7 @@ jQuery(document).ready(function($) {
 	    var correct = $.inArray(answer_index, mc_answers);
 	    // $('.answer_'+correct).addClass('correct');
 	    $('.answer').each(function(idx, ele){
-	    	// console.log( $(this).data('answer'), $('.question').data('answer') );
+	    	// consolelog( $(this).data('answer'), $('.question').data('answer') );
 	    	if ( $(this).data('answer') == $('.question').data('answer') ) {
 	    		$(this).addClass('correct');
 		    }
@@ -448,12 +452,12 @@ jQuery(document).ready(function($) {
 	    return generated;
 	}
 	function get_random_groupindex(group){
-		// console.log('get_random_groupindex');
+		// consolelog('get_random_groupindex');
 	    var random_index = Math.floor(Math.random()*group.length);
-		// console.log(completed);
-	    //console.log(completed.toString(), random_index, $.inArray(random_index, completed));
+		// consolelog(completed);
+	    //consolelog(completed.toString(), random_index, $.inArray(random_index, completed));
 	    if ( $.inArray(random_index, completed) < 0 ){
-	        //console.log('unique found');
+	        //consolelog('unique found');
 	        return random_index;
 	    }
 	    else if( completed.length == group.length ){
@@ -461,7 +465,7 @@ jQuery(document).ready(function($) {
 	        return random_index;
 	    }
 	    else{
-	        //console.log('repeat found');
+	        //consolelog('repeat found');
 	        return get_random_groupindex(group);
 	    }
 	}
@@ -483,7 +487,7 @@ jQuery(document).ready(function($) {
 
 
 	$('.content').on('click', '.answer', function(e){
-		//console.log('clicked',$(this).attr('data-id'));
+		//consolelog('clicked',$(this).attr('data-id'));
 		if ( !$(this).hasClass('list') ) {
 
 			// LEARN MODE
@@ -512,16 +516,16 @@ jQuery(document).ready(function($) {
 			        // end_time = new Date();
 			        // seconds = Math.floor( (start_time - end_time ) / -1000);
 			        // var correct_per_minute = Math.round( (num_correct / seconds ) * 60 );
-			    //console.log( correct_per_minute );
+			    //consolelog( correct_per_minute );
 			    //update score + feedback
 			    $('.footer').html('');
 
 			    //if round complete
-			    //console.log(is_correct, num_correct, active_team.length, num_total);
+			    //consolelog(is_correct, num_correct, active_team.length, num_total);
 			    if( is_correct && num_correct == active_team.length ) {
-			        if (gaPlugin) {
-			        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt') );
-			        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Round", "End", levels[level][0] + ' ' + mode, parseInt(num_correct / (num_total+1)*100 ) );
+			        if (analytics) {
+			        	analytics.sendEvent("Answer", "Correct", $(this).data('alt') );
+			        	analytics.sendEvent("Round", "End", levels[level][0] + ' ' + mode, parseInt(num_correct / (num_total+1)*100 ) );
 			        }
 			        $('.footer').html(kudos[get_random_index(kudos)] + ' You Know All ' + active_team.length + '! ');
 			        $('.footer').append( score_percent + '% Accuracy! ');
@@ -542,8 +546,8 @@ jQuery(document).ready(function($) {
 			        if (num_correct > 1){ $('.footer').append('s'); }
 			        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 			        //$('.footer').append( seconds + ' seconds! ');
-			        if (gaPlugin) {
-						gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt') );
+			        if (analytics) {
+						analytics.sendEvent("Answer", "Correct", $(this).data('alt') );
 					}
 			    }
 			    //correct answer
@@ -553,8 +557,8 @@ jQuery(document).ready(function($) {
 			        if (num_correct > 1){ $('.footer').append('s'); }
 			        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 			        //$('.footer').append( seconds + ' seconds! ');
-			        if (gaPlugin) {
-				        gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt') );
+			        if (analytics) {
+				        analytics.sendEvent("Answer", "Correct", $(this).data('alt') );
 				    }
 			    }
 			    //incorrect answer
@@ -564,8 +568,8 @@ jQuery(document).ready(function($) {
 			        if (num_correct > 1){ $('.footer').append('s'); }
 			        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 			        //$('.footer').append( seconds + ' seconds! ');
-			        if (gaPlugin) {
-			        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Incorrect", $(this).parent().find('.correct').data('alt') );
+			        if (analytics) {
+			        	analytics.sendEvent("Answer", "Incorrect", $(this).parent().find('.correct').data('alt') );
 					}
 			    }
 
@@ -603,7 +607,7 @@ jQuery(document).ready(function($) {
 			    else{
 			    	num_incorrect++;
 			    }
-			    //console.log('pushing to complete list: '+$('.correct').attr('data-id'), $('.correct').data('alt') );
+			    //consolelog('pushing to complete list: '+$('.correct').attr('data-id'), $('.correct').data('alt') );
 			    completed.push( parseInt($('.correct').attr('data-id')) );
 			    
 			    // if( $(this).data('alt') != undefined ) {
@@ -613,15 +617,15 @@ jQuery(document).ready(function($) {
 			        // end_time = new Date();
 			        // seconds = Math.floor( (start_time - end_time ) / -1000);
 			        // var correct_per_minute = Math.round( (num_correct / seconds ) * 60 );
-			    //console.log( correct_per_minute );
+			    //consolelog( correct_per_minute );
 			    //update score + feedback
 			    $('.footer').html('');
 
 			    //round complete
 			    if( parseInt(active_team.length - completed.length) <= 0 ) {
-			        if (gaPlugin) {
-			        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt') );
-			        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Round", "End", levels[level][0] + ' ' + mode, parseInt(num_correct / (num_total+1)*100 ) );
+			        if (analytics) {
+			        	analytics.sendEvent("Answer", "Correct", $(this).data('alt') );
+			        	analytics.sendEvent("Round", "End", levels[level][0] + ' ' + mode, parseInt(num_correct / (num_total+1)*100 ) );
 			        }
 			        $('.footer').html('Test Complete. You Know ' + num_correct + ' of ' + active_team.length + ' players! ');
 			        $('.footer').append( score_percent + '% Accuracy! ');
@@ -643,8 +647,8 @@ jQuery(document).ready(function($) {
 				        // if (num_correct > 1){ $('.footer').append('s'); }
 				        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 				        //$('.footer').append( seconds + ' seconds! ');
-				        if (gaPlugin) {
-				        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt'));
+				        if (analytics) {
+				        	analytics.sendEvent("Answer", "Correct", $(this).data('alt'));
 				        }
 				    }
 				    //correct answer
@@ -654,8 +658,8 @@ jQuery(document).ready(function($) {
 				        // if (num_correct > 1){ $('.footer').append('s'); }
 				        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 				        //$('.footer').append( seconds + ' seconds! ');
-				        if (gaPlugin) {
-				        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Correct", $(this).data('alt'));
+				        if (analytics) {
+				        	analytics.sendEvent("Answer", "Correct", $(this).data('alt'));
 						}
 				    }
 				    //incorrect answer
@@ -665,8 +669,8 @@ jQuery(document).ready(function($) {
 				        // if (num_correct > 1){ $('.footer').append('s'); }
 				        $('.footer').append( '! ' + parseInt(active_team.length - completed.length)  + ' left. ');
 				        //$('.footer').append( seconds + ' seconds! ');
-				        if (gaPlugin) {
-				        	gaPlugin.trackEvent( nativePluginResultHandler, nativePluginErrorHandler, "Answer", "Incorrect", $(this).parent().find('.correct').data('alt') );
+				        if (analytics) {
+				        	analytics.sendEvent("Answer", "Incorrect", $(this).parent().find('.correct').data('alt') );
 						}
 				    }
 
@@ -692,7 +696,7 @@ jQuery(document).ready(function($) {
 
 	$('.menu a').on('click touch', function(e){
 		e.preventDefault();
-		console.log( $(this).text() );
+		//consolelog( $(this).text() );
 
 		switch( $(this).attr('class') ) {
 			case 'view_all':
