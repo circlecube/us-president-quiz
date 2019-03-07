@@ -2,8 +2,8 @@
     <widget xmlns = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.circlecube.uspresidentialquiz"
-        versionCode="150" 
-        version   = "1.5.0">
+        versionCode="151" 
+        version   = "1.5.1">
 
     <name>US Presidental Quiz</name>
 
@@ -56,6 +56,8 @@
         42. Bill Clinton
         43. George W. Bush
         44. Barack Obama
+		45. Donal Trump
+		
     </description>
 
     <author href="https://circlecube.com" email="evan@circlecube.com">
