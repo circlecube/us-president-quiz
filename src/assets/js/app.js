@@ -123,7 +123,7 @@ jQuery(document).ready(function($) {
 			consolelog( 'loading new json data');
 
 			$.ajax({
-			  url: 'https://app.circlecube.com/uspresidents/wp-json/wp/v2/president?per_page=50&order=asc&orderby=meta_value_num&meta_key=took_office',
+			  url: 'https://circlecube.com/uspresidents/wp-json/wp/v2/president?per_page=50&order=asc&orderby=meta_value_num&meta_key=took_office',
 			  cache: false,
 			  dataType: 'json',
 			  error: function ( jqXHR, textStatus, errorThrown ) {
